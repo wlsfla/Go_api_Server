@@ -35,16 +35,6 @@ func main() {
 		return c.Download("./file/windwos_update_dev.ps1")
 	})
 
-	app.Get("/test2/:hostname/:winver", func(c *fiber.Ctx) error {
-
-		return c.JSON(fiber.Map{
-			"test":     "test",
-			"ip":       c.IP(),
-			"hostname": c.Params("hostname"),
-			"winver":   c.Params("winver"),
-		})
-	})
-
 	app.Get("/api/info_reg/:hostname/:winver", func(c *fiber.Ctx) error {
 		// c.IP()
 		// c.Params("hostname")
@@ -65,5 +55,5 @@ func main() {
 
 	app.Get("/", monitor.New(monitor.Config{Title: "MyService Metrics Page"}))
 
-	log.Fatal(app.Listen(":7979")) // http://localhost:7979/
+	log.Fatal(app.Listen(":80")) // http://localhost:7979/
 }
