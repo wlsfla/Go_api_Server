@@ -79,8 +79,7 @@ func main() {
 	})
 
 	app.Get("/file/:winver", func(c *fiber.Ctx) error {
-		// winver := c.Params("winver")
-		return c.Download("./file/windwos_update_dev.ps1")
+		return c.Download(fmt.Sprintf("./file/%s.msu", c.Params("winver")))
 	})
 
 	app.Get("/sysmon", func(c *fiber.Ctx) error {
