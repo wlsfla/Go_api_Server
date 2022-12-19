@@ -1,3 +1,2 @@
-cd ./src/app
-mkdir log
+cd src/app
 go run app.go

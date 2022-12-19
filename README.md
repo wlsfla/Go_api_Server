@@ -14,29 +14,15 @@
 	
 ## C. Api Description.
 ---
-	가. ps1 file request.
-		* iuput: [Get] /api/file/ps
+	가. ps1 file request. @
+		* iuput: [Get] /update/ps
 		* output:
 	    ```
-			{
-				data:{
-					url:{:url}
-				}
-				state:1
-			}
+			return powershell file
         ```
 	
-	나. info register
-		* iuput: [post] /api/info_reg
-        ```
-			{
-				data:{ # insert into DB
-					hostname:{:hostname},
-					winver:{:winver}
-				}
-				state:1
-			}
-        ```
+	나. info register @
+		* iuput: [post] /api/info_reg/:hostname/:winver
 		* output:
 		```
         	{
@@ -50,24 +36,15 @@
         ```
 		
 	
-	다. Result Report
-		* iuput: [post] /api/result/
-        ```
-        	{
-				data:{ # insert into DB
-					hostname:{:hostname},
-					result:{:result}
-				},
-				state:{:state}
-			}
+	다. Result Report @
+		* iuput: [post] /api/result/:hostname/:result
 		* output: None
 
 ## D. DB Description
 ---
 	가. Attribute
-        - index: sequence 사용
         - pc_ip: Sender Client ip 사용
         - hostname: hostname
         - created_time: yyyy-mm-dd hh:mm:ss
         - updated_time: yyyy-mm-dd hh:mm:ss
-        - result: 0: 미수행, 1: 성공, 2: 오류
+        - result: 0: 미수행, 1: 성공, 2: 오류 3: 해당없음
