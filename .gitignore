@@ -21,7 +21,7 @@
 *.dll
 
 # Fortran module files
-*.mod
+# *.mod # except go
 *.smod
 
 # Compiled Static libraries
@@ -794,4 +794,4 @@ go.work
 
 # End of https://www.toptal.com/developers/gitignore/api/go
 
-# End of https://www.toptal.com/developers/gitignore/api/windows,macos,visualstudio,visualstudiocode,python,c++,jetbrains+all,xcode
+# End of https://www.toptal.com/developers/gitignore/api/windows,macos,visualstudio,visualstudiocode,python,c++,jetbrains+all,xcod
