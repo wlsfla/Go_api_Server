@@ -30,7 +30,7 @@ func dbinit() {
 	defer db.Close()
 
 	db.Exec("CREATE TABLE IF NOT EXISTS 'update_log' ('host_ip' varchar(15) NOT NULL,'host_name' varchar(255) NOT NULL,'winver' char(5) NOT NULL,'result' int(5) NOT NULL,'created_time' datetime NOT NULL,'updated_time' datetime NOT NULL,PRIMARY KEY ('host_ip'))")
-	db.Exec("INSERT INTO 'update_log' VALUES ('1.1.1.1', 'host_name', '1901', 0, datetime('now', 'localtime'), datetime('now', 'localtime'))")
+	db.Exec("INSERT INTO 'update_log' VALUES ('1.1.1.1', 'host_name', '1901', 0, datetime('now', 'localtime'), datetime('now', 'localtime'))") // dummy data
 
 	rows, err := db.Query("SELECT * FROM update_log")
 	if err != nil {
@@ -75,6 +75,10 @@ func main() {
 	})
 
 	app.Get("/update/ps", func(c *fiber.Ctx) error { // 이것만 남음
+		return c.Download("./file/Scheduled_Register.ps1")
+	})
+
+	app.Get("/update/ps2", func(c *fiber.Ctx) error { // 이것만 남음
 		return c.Download("./file/windwos_update_dev.ps1")
 	})
 
@@ -125,7 +129,7 @@ func main() {
 		})
 	})
 
-	app.Get("/", monitor.New(monitor.Config{Title: "MyService Metrics Page"}))
+	app.Get("/", monitor.New(monitor.Config{Title: "Service Metrics Page"}))
 
 	log.Fatal(app.Listen(":7979")) // http://localhost:7979/
 }

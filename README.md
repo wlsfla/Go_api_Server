@@ -48,3 +48,18 @@
         - created_time: yyyy-mm-dd hh:mm:ss
         - updated_time: yyyy-mm-dd hh:mm:ss
         - result: 0: 미수행, 1: 성공, 2: 오류 3: 해당없음
+
+## E. Update Version Check Logic
+---
+if (현재 시스템의 winver이 1803이면)
+    return 수동 업데이트
+if (현재 시스템의 빌드버전이 같으면)
+    - 적용 완료
+if (현재 시스템의 빌드버전이 높으면)
+    - 업데이트 불가(기 업데이트 완료)
+
+#현재 시스템의 빌드버전이 낮으면
+if (업데이트 목록에 현재 업데이트가 있으면)
+        - 적용 완료
+
+업데이트 스케줄러 등록
