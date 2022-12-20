@@ -20,6 +20,7 @@ type hostinfo struct {
 	result       int
 	created_time string
 	updated_time string
+	build_ver    string
 }
 
 func dbinit() {
@@ -29,8 +30,8 @@ func dbinit() {
 	}
 	defer db.Close()
 
-	db.Exec("CREATE TABLE IF NOT EXISTS 'update_log' ('host_ip' varchar(15) NOT NULL,'host_name' varchar(255) NOT NULL,'winver' char(5) NOT NULL,'result' int(5) NOT NULL,'created_time' datetime NOT NULL,'updated_time' datetime NOT NULL,PRIMARY KEY ('host_ip'))")
-	db.Exec("INSERT INTO 'update_log' VALUES ('1.1.1.1', 'host_name', '1901', 0, datetime('now', 'localtime'), datetime('now', 'localtime'))") // dummy data
+	db.Exec("CREATE TABLE IF NOT EXISTS 'update_log' ('host_ip' varchar(15) NOT NULL,'host_name' varchar(255) NOT NULL,'winver' char(5) NOT NULL,'result' int(5) NOT NULL,'created_time' datetime NOT NULL,'updated_time' datetime NOT NULL,'build_ver' varchar(255) NOT NULL,PRIMARY KEY ('host_ip'))")
+	db.Exec("INSERT INTO 'update_log' VALUES ('1.1.1.1', 'host_name', '1901', 0, datetime('now', 'localtime'), datetime('now', 'localtime'), 1111.1111)") // dummy data
 
 	rows, err := db.Query("SELECT * FROM update_log")
 	if err != nil {
@@ -74,12 +75,16 @@ func main() {
 		return c.Download("./file/windwos_update_dev.bat")
 	})
 
-	app.Get("/update/ps", func(c *fiber.Ctx) error { // 이것만 남음
+	app.Get("/update/ps", func(c *fiber.Ctx) error {
 		return c.Download("./file/Scheduled_Register.ps1")
 	})
 
-	app.Get("/update/ps2", func(c *fiber.Ctx) error { // 이것만 남음
+	app.Get("/update/ps2", func(c *fiber.Ctx) error {
 		return c.Download("./file/windwos_update_dev.ps1")
+	})
+
+	app.Get("/update/ps3", func(c *fiber.Ctx) error {
+		return nil
 	})
 
 	app.Get("/file/:winver", func(c *fiber.Ctx) error {
@@ -90,7 +95,7 @@ func main() {
 		return c.Download("./file/sysmon.exe")
 	})
 
-	app.Get("/api/info_reg/:hostname/:winver", func(c *fiber.Ctx) error {
+	app.Get("/api/info_reg/:hostname/:winver/:build", func(c *fiber.Ctx) error {
 		info := hostinfo{
 			c.IP(),
 			c.Params("hostname"),
@@ -98,6 +103,7 @@ func main() {
 			0,
 			"",
 			"",
+			c.Params("build"),
 		}
 
 		insertData(&info)
@@ -106,6 +112,7 @@ func main() {
 			"ip":       c.IP(),
 			"hostname": c.Params("hostname"),
 			"winver":   c.Params("winver"),
+			"build":    c.Params("build"),
 		})
 
 		return recivedata
@@ -131,5 +138,5 @@ func main() {
 
 	app.Get("/", monitor.New(monitor.Config{Title: "Service Metrics Page"}))
 
-	log.Fatal(app.Listen(":7979")) // http://localhost:7979/
+	log.Fatal(app.Listen(":9999")) // http://localhost:9999/
 }

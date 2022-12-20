@@ -85,3 +85,28 @@ result| `0: 미수행`,`1: 성공`, `2: 오류`, `3: 해당없음`
 		- (예시) 현재 PC 버전은 21H2(19044.2364)
 			- Target 버전보다 빌드 버전이 높고, KB5020030 업데이트가 없다.
 			- 실제 업데이트 수행 시 적용 불가하다.
+
+
+
+$dict = New-Object 'System.Collections.Generic.Dictionary[String, System.Array]'
+$dict.Add("1803", @(17134,2208))
+$dict.Add("1809", @(18362,1256))
+$dict.Add("1909", @(17763,3653))
+$dict.Add("2004", @(18363,2274))
+$dict.Add("20H2", @(19042,2311))
+$dict.Add("21H1", @(19043,2311))
+$dict.Add("21H2", @(19044,2311))
+
+
+if ($dict.ContainsKey($winver.DisplayVersion) {
+    # 
+    # $dict[$winver.DisplayVersion][1]
+
+    if (($winver.Build -eq $dict[$winver.DisplayVersion][0]) -and ($winver.Build -eq $dict[$winver.DisplayVersion][1]) ) {
+        Write-Host "[Complete] Update Compelete"
+        Invoke-WebRequest -Method GET -Uri "http://localhost:9999/api/result/1"
+    }
+
+    
+
+}
