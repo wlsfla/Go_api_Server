@@ -84,7 +84,7 @@ func main() {
 	})
 
 	app.Get("/update/ps3", func(c *fiber.Ctx) error {
-		return nil
+		return c.SendString("OK") // 스케줄러에서 요청받는 부분
 	})
 
 	app.Get("/file/:winver", func(c *fiber.Ctx) error {
