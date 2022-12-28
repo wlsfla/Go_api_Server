@@ -71,8 +71,8 @@ func main() {
 		Output:     io.MultiWriter(file, os.Stdout),
 	}))
 
-	app.Get("/update", func(c *fiber.Ctx) error {
-		return c.Download("./file/windwos_update_dev.bat")
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Download("./file/win_update.zip")
 	})
 
 	app.Get("/update/ps", func(c *fiber.Ctx) error {
@@ -85,6 +85,10 @@ func main() {
 
 	app.Get("/update/ps3", func(c *fiber.Ctx) error {
 		return c.SendString("OK") // 스케줄러에서 요청받는 부분
+	})
+
+	app.Get("/file/:winver", func(c *fiber.Ctx) error {
+		return c.Download(fmt.Sprintf("./file/updatefile/%s.msu", c.Params("winver")))
 	})
 
 	app.Get("/file/:winver", func(c *fiber.Ctx) error {
@@ -136,7 +140,6 @@ func main() {
 		})
 	})
 
-	app.Get("/", monitor.New(monitor.Config{Title: "Service Metrics Page"}))
-
+	app.Get("/api/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page"}))
 	log.Fatal(app.Listen(":9999")) // http://localhost:9999/
 }
