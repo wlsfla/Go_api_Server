@@ -7,10 +7,10 @@ import (
 	"log"
 	"os"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type hostinfo struct {
@@ -23,38 +23,19 @@ type hostinfo struct {
 	build_ver    string
 }
 
-func dbinit() {
-	db, err := sql.Open("sqlite3", "./log.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	db.Exec("CREATE TABLE IF NOT EXISTS 'update_log' ('host_ip' varchar(15) NOT NULL,'host_name' varchar(255) NOT NULL,'winver' char(5) NOT NULL,'result' int(5) NOT NULL,'created_time' datetime NOT NULL,'updated_time' datetime NOT NULL,'build_ver' varchar(255) NOT NULL,PRIMARY KEY ('host_ip'))")
-	db.Exec("INSERT INTO 'update_log' VALUES ('1.1.1.1', 'host_name', '1901', 0, datetime('now', 'localtime'), datetime('now', 'localtime'), 1111.1111)") // dummy data
-
-	rows, err := db.Query("SELECT * FROM update_log")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	rows.Close()
-}
+var server_ip string
 
 func insertData(info *hostinfo) {
-	db, err := sql.Open("sqlite3", "./log.db")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// insert into GoAPIService.pc_info values ('1.1.1.1', 'dummy_host', '1900', '1111.1111', default, default, 0);
+	db, _ := sql.Open("mysql", "root:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService")
 	defer db.Close()
 
-	querystr := fmt.Sprintf("INSERT INTO 'update_log' VALUES ('%s', '%s', '%s', %d, datetime('now', 'localtime'), datetime('now', 'localtime'))", info.host_ip, info.host_name, info.winver, info.result)
+	querystr := fmt.Sprintf("insert into GoAPIService.pc_info values ('%s', '%s', '%s', '%s', default, default, 0)", info.host_ip, info.host_name, info.winver, info.build_ver)
 	db.Exec(querystr)
 }
 
 func main() {
-	dbinit()
-
+	server_ip = "127.0.0.1"
 	app := fiber.New()
 
 	file, err := os.OpenFile("access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -75,14 +56,6 @@ func main() {
 		return c.Download("./file/win_update.zip")
 	})
 
-	app.Get("/update/ps", func(c *fiber.Ctx) error {
-		return c.Download("./file/Scheduled_Register.ps1")
-	})
-
-	app.Get("/update/ps2", func(c *fiber.Ctx) error {
-		return c.Download("./file/windwos_update_dev.ps1")
-	})
-
 	app.Get("/update/ps3", func(c *fiber.Ctx) error {
 		return c.SendString("OK") // 스케줄러에서 요청받는 부분
 	})
@@ -99,7 +72,12 @@ func main() {
 		return c.Download("./file/sysmon.exe")
 	})
 
+	app.Get("/cdn/chartjs", func(c *fiber.Ctx) error { // http://localhost/cdn/chartjs
+		return c.Download("./js/Chart.bundle.min.js")
+	})
+
 	app.Get("/api/info_reg/:hostname/:winver/:build", func(c *fiber.Ctx) error {
+
 		info := hostinfo{
 			c.IP(),
 			c.Params("hostname"),
@@ -124,13 +102,12 @@ func main() {
 
 	app.Get("/api/result/:result", func(c *fiber.Ctx) error {
 		// winupdate 결과 table update
-		db, err := sql.Open("sqlite3", "./log.db")
-		if err != nil {
-			log.Fatal(err)
-		}
+		db, _ := sql.Open("mysql", "root:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService")
 		defer db.Close()
 
-		query_str := fmt.Sprintf("update 'update_log' set result=%s, updated_time=datetime('now', 'localtime') where host_ip='%s'", c.Params("result"), c.IP())
+		// UPDATE GoAPIService.pc_info SET updated_time = NOW() WHERE host_ip = '1.1.1.1';
+		// query_str := fmt.Sprintf("update 'update_log' set result=%s, updated_time=datetime('now', 'localtime') where host_ip='%s'", c.Params("result"), c.IP())
+		query_str := fmt.Sprintf("UPDATE GoAPIService.pc_info SET result=%s, updated_time=NOW() WHERE host_ip='%s'", c.Params("result"), c.IP())
 		db.Exec(query_str)
 
 		return c.JSON(fiber.Map{
@@ -140,6 +117,21 @@ func main() {
 		})
 	})
 
-	app.Get("/api/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page"}))
+	dbconnTest()
+	app.Get("/api/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + server_ip + "/cdn/chartjs"}))
 	log.Fatal(app.Listen(":9999")) // http://localhost:9999/
+}
+
+func dbconnTest() {
+	// if using mariaDB on docker-container, You have to change ip address "host.docker.internal"
+	// issue https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host
+	db, err := sql.Open("mysql", "root:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	var version string
+	db.QueryRow("SELECT VERSION()").Scan(&version)
+	fmt.Println("Connected to:", version)
 }
