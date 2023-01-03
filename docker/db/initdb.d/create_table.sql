@@ -1,0 +1,10 @@
+CREATE TABLE GoAPIService.update_info (
+    host_ip VARCHAR(45) NOT NULL,
+    host_name VARCHAR(255),
+    winver VARCHAR(10),
+    buildver VARCHAR(45),
+    created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    result TINYINT,
+    PRIMARY KEY (host_ip)
+);

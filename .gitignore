@@ -1,39 +1,6 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,visualstudio,visualstudiocode,python,c++,jetbrains+all,xcode
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,visualstudio,visualstudiocode,python,c++,jetbrains+all,xcode
 
-### C++ ###
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-# *.mod # except go
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
 
 ### JetBrains+all ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
