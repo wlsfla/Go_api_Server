@@ -24,17 +24,26 @@ type hostinfo struct {
 }
 
 var server_ip string
+var winverlist map[string]string
+
+func getDBConn() *sql.DB {
+	// if using mariaDB on docker-container, You have to change ip address "host.docker.internal"
+	// issue https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host
+	db, _ := sql.Open("mysql", "root:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService")
+
+	return db
+}
 
 func insertData(info *hostinfo) {
-	// insert into GoAPIService.pc_info values ('1.1.1.1', 'dummy_host', '1900', '1111.1111', default, default, 0);
-	db, _ := sql.Open("mysql", "root:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService")
+	db := getDBConn()
 	defer db.Close()
 
-	querystr := fmt.Sprintf("insert into GoAPIService.pc_info values ('%s', '%s', '%s', '%s', default, default, 0)", info.host_ip, info.host_name, info.winver, info.build_ver)
+	querystr := fmt.Sprintf("insert into GoAPIService.update_info values ('%s', '%s', '%s', '%s', default, default, %d)", info.host_ip, info.host_name, info.winver, info.build_ver, info.result)
 	db.Exec(querystr)
 }
 
 func main() {
+	winverlist = getTarget_winver()
 	server_ip = "127.0.0.1"
 	app := fiber.New()
 
@@ -101,13 +110,10 @@ func main() {
 	})
 
 	app.Get("/api/result/:result", func(c *fiber.Ctx) error {
-		// winupdate 결과 table update
-		db, _ := sql.Open("mysql", "root:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService")
+		db := getDBConn()
 		defer db.Close()
 
-		// UPDATE GoAPIService.pc_info SET updated_time = NOW() WHERE host_ip = '1.1.1.1';
-		// query_str := fmt.Sprintf("update 'update_log' set result=%s, updated_time=datetime('now', 'localtime') where host_ip='%s'", c.Params("result"), c.IP())
-		query_str := fmt.Sprintf("UPDATE GoAPIService.pc_info SET result=%s, updated_time=NOW() WHERE host_ip='%s'", c.Params("result"), c.IP())
+		query_str := fmt.Sprintf("UPDATE GoAPIService.update_info SET result=%s  WHERE host_ip='%s'", c.Params("result"), c.IP())
 		db.Exec(query_str)
 
 		return c.JSON(fiber.Map{
@@ -117,18 +123,38 @@ func main() {
 		})
 	})
 
+	app.Get("/winver/:winver", func(c *fiber.Ctx) error {
+
+		return c.SendString(
+			winverlist[c.Params("winver")],
+		)
+	})
+
 	dbconnTest()
 	app.Get("/api/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + server_ip + "/cdn/chartjs"}))
 	log.Fatal(app.Listen(":9999")) // http://localhost:9999/
 }
 
-func dbconnTest() {
-	// if using mariaDB on docker-container, You have to change ip address "host.docker.internal"
-	// issue https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host
-	db, err := sql.Open("mysql", "root:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService")
-	if err != nil {
-		panic(err.Error())
+func getTarget_winver() map[string]string {
+	db := getDBConn()
+	defer db.Close()
+
+	winverlist := make(map[string]string)
+	var winver, name string
+	rows, _ := db.Query("select * from GoAPIService.target_winver")
+	for rows.Next() {
+		err := rows.Scan(&winver, &name)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		winverlist[winver] = name
 	}
+	return winverlist
+}
+
+func dbconnTest() {
+	db := getDBConn()
 	defer db.Close()
 
 	var version string

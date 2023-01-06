@@ -1,0 +1,1 @@
+go run ./web/app/app.go

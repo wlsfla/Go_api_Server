@@ -11,13 +11,16 @@ CREATE TABLE GoAPIService.update_info (
 
 CREATE TABLE GoAPIService.target_winver (
 	winver VARCHAR(10),
-    buildver VARCHAR(45),
+    buildver VARCHAR(45)
 );
 
-insert into	GoAPIService.target_winver values ("1803", "17134.2208");
-insert into	GoAPIService.target_winver values ("1809", "17763.3653");
-insert into	GoAPIService.target_winver values ("1903", "18362.1256");
-insert into	GoAPIService.target_winver values ("1909", "18363.2274");
-insert into	GoAPIService.target_winver values ("20H2", "19042.2311");
-insert into	GoAPIService.target_winver values ("21H1", "19043.2311");
-insert into	GoAPIService.target_winver values ("21H2", "19044.2311");
+insert into	GoAPIService.target_winver
+values
+	("1803", "17134.2208"),
+	("1809", "17763.3653"),
+	("1903", "18362.1256"),
+	("1909", "18363.2274"),
+	("20H2", "19042.2311"),
+	("21H1", "19043.2311"),
+	("21H2", "19044.2311");
+
