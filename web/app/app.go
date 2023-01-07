@@ -14,13 +14,11 @@ import (
 )
 
 type hostinfo struct {
-	host_ip      string
-	host_name    string
-	winver       string
-	result       int
-	created_time string
-	updated_time string
-	build_ver    string
+	host_ip   string
+	host_name string
+	winver    string
+	build_ver string
+	result    string
 }
 
 var server_ip string
@@ -91,10 +89,8 @@ func main() {
 			c.IP(),
 			c.Params("hostname"),
 			c.Params("winver"),
-			0,
-			"",
-			"",
 			c.Params("build"),
+			0,
 		}
 
 		insertData(&info)
@@ -130,9 +126,56 @@ func main() {
 		)
 	})
 
+	// refactoring
+	api := app.Group("/api")
+	v2 := api.Group("/v2")
+	v2.Get("/winver", func(c *fiber.Ctx) error {
+		return c.JSON(winverlist)
+	})
+
+	v2.Get("/winver/:winver", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"result":   1,
+			"buildver": winverlist[c.Params("winver")],
+		})
+	})
+
+	v2.Get("/updateinfo/:info", func(c *fiber.Ctx) error {
+		// /updateinfo?
+		// 		host_name=${host_name}&
+		//		winver=${winver}&
+		//		buildver=${buildver}&
+		//		created_time=${created_time}&
+		//		updated_time=${updated_time}&
+		//		result=${result}
+
+		hostip := c.IP()
+		db := getDBConn()
+		defer db.Close()
+
+		query := fmt.Sprintf("select host_ip from GoAPIService.update_info where host_ip = %s", hostip)
+
+		info := hostinfo{
+			c.IP(),
+			c.Query("host_name"),
+			c.Query("winver"),
+			c.Query("buildver"),
+			c.Query("result"),
+		}
+
+		return c.JSON(fiber.Map{
+			"result":   1,
+			"buildver": winverlist[c.Params("winver")],
+		})
+	})
+
 	dbconnTest()
-	app.Get("/api/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + server_ip + "/cdn/chartjs"}))
+	app.Get("/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + server_ip + "/cdn/chartjs"}))
 	log.Fatal(app.Listen(":9999")) // http://localhost:9999/
+}
+
+func insertUpdateinfo() {
+
 }
 
 func getTarget_winver() map[string]string {
