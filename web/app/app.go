@@ -1,13 +1,12 @@
 package main
 
 import (
-	"database/sql"
+	db "app/app/DBConfig"
 	"fmt"
 	"io"
 	"log"
 	"os"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
@@ -18,33 +17,20 @@ type hostinfo struct {
 	host_name string
 	winver    string
 	build_ver string
-	result    string
+	result    int
 }
 
 var server_ip string
 var winverlist map[string]string
 
-func getDBConn() *sql.DB {
-	// if using mariaDB on docker-container, You have to change ip address "host.docker.internal"
-	// issue https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host
-	db, _ := sql.Open("mysql", "root:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService")
-
-	return db
-}
-
-func insertData(info *hostinfo) {
-	db := getDBConn()
+func main() {
 	defer db.Close()
 
-	querystr := fmt.Sprintf("insert into GoAPIService.update_info values ('%s', '%s', '%s', '%s', default, default, %d)", info.host_ip, info.host_name, info.winver, info.build_ver, info.result)
-	db.Exec(querystr)
-}
-
-func main() {
 	winverlist = getTarget_winver()
 	server_ip = "127.0.0.1"
 	app := fiber.New()
 
+	// accesslog write
 	file, err := os.OpenFile("access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
@@ -93,7 +79,8 @@ func main() {
 			0,
 		}
 
-		insertData(&info)
+		query := fmt.Sprintf("insert into GoAPIService.update_info values ('%s', '%s', '%s', '%s', default, default, %d)", info.host_ip, info.host_name, info.winver, info.build_ver, info.result)
+		db.Insert(query)
 
 		recivedata := c.JSON(fiber.Map{
 			"ip":       c.IP(),
@@ -106,16 +93,13 @@ func main() {
 	})
 
 	app.Get("/api/result/:result", func(c *fiber.Ctx) error {
-		db := getDBConn()
-		defer db.Close()
-
-		query_str := fmt.Sprintf("UPDATE GoAPIService.update_info SET result=%s  WHERE host_ip='%s'", c.Params("result"), c.IP())
-		db.Exec(query_str)
+		query := fmt.Sprintf("UPDATE GoAPIService.update_info SET result=%s  WHERE host_ip='%s'", c.Params("result"), c.IP())
+		db.Update(query)
 
 		return c.JSON(fiber.Map{
 			"ip":     c.IP(),
 			"result": c.Params("result"),
-			"query":  query_str,
+			"query":  query,
 		})
 	})
 
@@ -126,6 +110,7 @@ func main() {
 		)
 	})
 
+	// ************************************************************************************
 	// refactoring
 	api := app.Group("/api")
 	v2 := api.Group("/v2")
@@ -150,13 +135,11 @@ func main() {
 		//		result=${result}
 
 		hostip := c.IP()
-		db := getDBConn()
-		defer db.Close()
 
 		query := fmt.Sprintf("select host_ip from GoAPIService.update_info where host_ip = %s", hostip)
 
 		info := hostinfo{
-			c.IP(),
+			hostip,
 			c.Query("host_name"),
 			c.Query("winver"),
 			c.Query("buildver"),
@@ -169,7 +152,6 @@ func main() {
 		})
 	})
 
-	dbconnTest()
 	app.Get("/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + server_ip + "/cdn/chartjs"}))
 	log.Fatal(app.Listen(":9999")) // http://localhost:9999/
 }
@@ -179,12 +161,10 @@ func insertUpdateinfo() {
 }
 
 func getTarget_winver() map[string]string {
-	db := getDBConn()
-	defer db.Close()
-
 	winverlist := make(map[string]string)
 	var winver, name string
-	rows, _ := db.Query("select * from GoAPIService.target_winver")
+	rows := db.Select("select * from GoAPIService.target_winver")
+
 	for rows.Next() {
 		err := rows.Scan(&winver, &name)
 		if err != nil {
@@ -194,13 +174,4 @@ func getTarget_winver() map[string]string {
 		winverlist[winver] = name
 	}
 	return winverlist
-}
-
-func dbconnTest() {
-	db := getDBConn()
-	defer db.Close()
-
-	var version string
-	db.QueryRow("SELECT VERSION()").Scan(&version)
-	fmt.Println("Connected to:", version)
 }
