@@ -114,17 +114,7 @@ func main() {
 	// refactoring
 	api := app.Group("/api")
 	v2 := api.Group("/v2")
-	v2.Get("/winver", func(c *fiber.Ctx) error {
-		return c.JSON(winverlist)
-	})
-
-	v2.Get("/winver/:winver", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"result":   1,
-			"buildver": winverlist[c.Params("winver")],
-		})
-	})
-
+	v2.Get("/winver/:winver", getwinver)
 	v2.Get("/updateinfo/:info", func(c *fiber.Ctx) error {
 		// /updateinfo?
 		// 		host_name=${host_name}&
@@ -154,24 +144,4 @@ func main() {
 
 	app.Get("/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + server_ip + "/cdn/chartjs"}))
 	log.Fatal(app.Listen(":9999")) // http://localhost:9999/
-}
-
-func insertUpdateinfo() {
-
-}
-
-func getTarget_winver() map[string]string {
-	winverlist := make(map[string]string)
-	var winver, name string
-	rows := db.Select("select * from GoAPIService.target_winver")
-
-	for rows.Next() {
-		err := rows.Scan(&winver, &name)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		winverlist[winver] = name
-	}
-	return winverlist
 }
