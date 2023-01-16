@@ -2,6 +2,7 @@ package main
 
 import (
 	db "app/app/DBConfig"
+	handler "app/app/api_handler"
 	"fmt"
 	"io"
 	"log"
@@ -21,12 +22,12 @@ type hostinfo struct {
 }
 
 var server_ip string
-var winverlist map[string]string
 
 func main() {
 	defer db.Close()
 
-	winverlist = getTarget_winver()
+	handler.Init()
+
 	server_ip = "127.0.0.1"
 	app := fiber.New()
 
@@ -39,7 +40,7 @@ func main() {
 
 	app.Use(logger.New(logger.Config{
 		// For more options, see the Config section
-		Format:     "${time}|${ip}|${port}|${status}|${method}|${path}\n",
+		Format:     "${time}\t|${ip}\t|${port}\t|${status}\t|${method}\t|${path}\n",
 		TimeFormat: "2006-01-02|15:04:05",
 		TimeZone:   "Asia/Seoul",
 		Output:     io.MultiWriter(file, os.Stdout),
@@ -103,18 +104,11 @@ func main() {
 		})
 	})
 
-	app.Get("/winver/:winver", func(c *fiber.Ctx) error {
-
-		return c.SendString(
-			winverlist[c.Params("winver")],
-		)
-	})
-
 	// ************************************************************************************
 	// refactoring
 	api := app.Group("/api")
 	v2 := api.Group("/v2")
-	v2.Get("/winver/:winver", getwinver)
+	v2.Get("/winver/:winver", handler.Getwinver)
 	v2.Get("/updateinfo/:info", func(c *fiber.Ctx) error {
 		// /updateinfo?
 		// 		host_name=${host_name}&

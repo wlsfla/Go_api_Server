@@ -11,7 +11,7 @@ var dbobj *sql.DB
 var schemaStr string
 
 func init() {
-	schemaStr = "root:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService"
+	schemaStr = "apiuser:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService"
 	dbobj = getDBConn()
 	connTest()
 }
