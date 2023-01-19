@@ -2,7 +2,7 @@ package main
 
 import (
 	db "app/DBConfig"
-	handler "app/api_handler"
+	api "app/api_handler"
 	"fmt"
 	"io"
 	"log"
@@ -26,7 +26,7 @@ var server_ip string
 func main() {
 	defer db.Close()
 
-	handler.Init()
+	api.Init()
 
 	server_ip = "127.0.0.1"
 	app := fiber.New()
@@ -47,17 +47,39 @@ func main() {
 		Output:     io.MultiWriter(file, os.Stdout), // write file and stdout
 	}))
 
-	// ************************************************************************************
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Download("./file/win_update.zip")
+	})
+
+	app.Get("/file/:winver", api.Download_UpdateFile)
+
+	app.Get("/cdn/chartjs", func(c *fiber.Ctx) error {
+		// http://localhost/cdn/chartjs
+		return c.Download("./js/Chart.bundle.min.js")
+	})
+
+	app.Get("/api/result/:result", func(c *fiber.Ctx) error {
+		query := fmt.Sprintf("UPDATE GoAPIService.update_info SET result=%s  WHERE host_ip='%s'", c.Params("result"), c.IP())
+		db.Update(query)
+
+		return c.JSON(fiber.Map{
+			"ip":     c.IP(),
+			"result": c.Params("result"),
+			"query":  query,
+		})
+	})
+
 	// ************************************************************************************
 	// refactoring
 
-	app.Get("/cdn/chartjs", handler.Download_Chartjs) // http://localhost/cdn/chartjs
-	app.Get("/", handler.Download_Downloader)
+	app.Get("/cdn/chartjs", api.Download_Chartjs) // http://localhost/cdn/chartjs
+	app.Get("/", api.Download_Downloader)
 
 	api := app.Group("/api")
 	v2 := api.Group("/v2")
-	v2.Get("/buildver/?:winver", handler.GetBuildVer) //
-	v2.Get("/file/:winver", handler.Download_updatefile)
+	v2.Get("/buildver/?:winver", api.GetBuildVer) //
+	v2.Get("/file/:winver", api.Download_updatefile)
+	v2.Get("/winver/:winver")
 	v2.Get("/updateinfo/:info", func(c *fiber.Ctx) error {
 		// /updateinfo?
 		// 		host_name=${host_name}&
