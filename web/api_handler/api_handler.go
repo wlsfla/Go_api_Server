@@ -2,6 +2,8 @@ package api_handler
 
 import (
 	db "app/DBConfig"
+	model "app/model"
+	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -36,6 +38,28 @@ func init_winverlist() {
 	}
 }
 
-func insertUpdateinfo() {
+func InsertHostinfo(c *fiber.Ctx) error {
+	info := model.New_Hostinfo(c)
+	query := fmt.Sprintf("insert into GoAPIService.update_info values(%s, %s, %s, default, default, %s)", info.Host_ip, info.Host_name, info.Winver, info.Result)
+	db.Update(query)
 
+	return c.SendStatus(200)
+}
+
+func UpdateHostinfo(c *fiber.Ctx) error {
+	// /insert/info/
+	// 		buildver=${buildver}&
+	// 		result=${result}
+
+	info := model.New_Hostinfo(c)
+	query := fmt.Sprintf("UPDATE GoAPIService.update_info SET result=%s  WHERE host_ip='%s'", info.Result, info.Host_ip)
+	db.Update(query)
+
+	return c.SendStatus(200)
+}
+
+func v2(api *fiber.Router) fiber.Router {
+	// v2 := api.Group("/v2")
+
+	return nil
 }

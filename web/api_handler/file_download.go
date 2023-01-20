@@ -7,10 +7,11 @@ import (
 )
 
 func Download_Chartjs(c *fiber.Ctx) error {
+	// http://localhost/cdn/chartjs
 	return c.Download("./js/Chart.bundle.min.js")
 }
 
-func Download_Downloader(c *fiber.Ctx) error {
+func Download_UpdateDownloader(c *fiber.Ctx) error {
 	return c.Download("./file/win_update.zip")
 }
 

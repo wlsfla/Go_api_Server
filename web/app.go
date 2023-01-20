@@ -2,31 +2,25 @@ package main
 
 import (
 	db "app/DBConfig"
-	api "app/api_handler"
+	api_handler "app/api_handler"
 	"fmt"
 	"io"
 	"log"
 	"os"
+
+	model "app/model"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 )
 
-type hostinfo struct {
-	host_ip   string
-	host_name string
-	winver    string
-	build_ver string
-	result    int
-}
-
 var server_ip string
 
 func main() {
 	defer db.Close()
 
-	api.Init()
+	api_handler.Init()
 
 	server_ip = "127.0.0.1"
 	app := fiber.New()
@@ -47,39 +41,21 @@ func main() {
 		Output:     io.MultiWriter(file, os.Stdout), // write file and stdout
 	}))
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Download("./file/win_update.zip")
-	})
-
-	app.Get("/file/:winver", api.Download_UpdateFile)
-
-	app.Get("/cdn/chartjs", func(c *fiber.Ctx) error {
-		// http://localhost/cdn/chartjs
-		return c.Download("./js/Chart.bundle.min.js")
-	})
-
-	app.Get("/api/result/:result", func(c *fiber.Ctx) error {
-		query := fmt.Sprintf("UPDATE GoAPIService.update_info SET result=%s  WHERE host_ip='%s'", c.Params("result"), c.IP())
-		db.Update(query)
-
-		return c.JSON(fiber.Map{
-			"ip":     c.IP(),
-			"result": c.Params("result"),
-			"query":  query,
-		})
-	})
-
 	// ************************************************************************************
 	// refactoring
 
-	app.Get("/cdn/chartjs", api.Download_Chartjs) // http://localhost/cdn/chartjs
-	app.Get("/", api.Download_Downloader)
+	app.Get("/", api_handler.Download_UpdateDownloader)
+	app.Get("/cdn/chartjs", api_handler.Download_Chartjs) // http://localhost/cdn/chartjs
+	app.Get("/file/:winver", api_handler.Download_updatefile)
 
 	api := app.Group("/api")
 	v2 := api.Group("/v2")
-	v2.Get("/buildver/?:winver", api.GetBuildVer) //
-	v2.Get("/file/:winver", api.Download_updatefile)
+	v2.Get("/buildver/?:winver")
+	v2.Get("/file/:winver")
 	v2.Get("/winver/:winver")
+	v2.Get("/insert/info/", api_handler.InsertHostinfo)
+	v2.Get("/update/info", api_handler.UpdateHostinfo)
+
 	v2.Get("/updateinfo/:info", func(c *fiber.Ctx) error {
 		// /updateinfo?
 		// 		host_name=${host_name}&
@@ -92,14 +68,7 @@ func main() {
 		hostip := c.IP()
 
 		query := fmt.Sprintf("select host_ip from GoAPIService.update_info where host_ip = %s", hostip)
-
-		info := hostinfo{
-			hostip,
-			c.Query("host_name"),
-			c.Query("winver"),
-			c.Query("buildver"),
-			c.Query("result"),
-		}
+		info := model.New_Hostinfo(c)
 
 		return c.JSON(fiber.Map{
 			"result":   1,
