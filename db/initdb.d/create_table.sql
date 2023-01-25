@@ -1,13 +1,15 @@
-CREATE TABLE GoAPIService.update_info (
+CREATE TABLE GoAPIService.update_log (
     host_ip VARCHAR(45) NOT NULL,
     host_name VARCHAR(255),
     winver VARCHAR(10),
     buildver VARCHAR(45),
-    created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    result TINYINT,
-    PRIMARY KEY (host_ip)
+    result TINYINT
 );
+/*
+    select host_ip, host_name, winver, buildver, max(updated_time), result from GoAPIService.update_log group by update_log.host_ip;
+    insert into GoAPIService.update_log values ("2.1.1.2", "test_name", "winver", "buildver", default, 0);
+*/
 
 CREATE TABLE GoAPIService.target_winver (
 	winver VARCHAR(10),
