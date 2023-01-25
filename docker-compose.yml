@@ -24,14 +24,5 @@ services:
     depends_on:
       - db
 
-  nginx:
-    container_name: file_server
-    image: nginx:1.23.3
-    ports:
-      - 80:9999
-      - 8080:8080
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/content:/var/www
 volumes:
   db_data: {}

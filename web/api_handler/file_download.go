@@ -12,10 +12,10 @@ func Download_Chartjs(c *fiber.Ctx) error {
 }
 
 func Download_UpdateDownloader(c *fiber.Ctx) error {
-	return c.Download("./file/win_update.zip")
+	return c.Download("./files/win_update.zip")
 }
 
 func Download_updatefile(c *fiber.Ctx) error {
 	// /winver/:winver
-	return c.Download(fmt.Sprintf("./file/updatefile/%s.msu", c.Params("winver")))
+	return c.Download(fmt.Sprintf("./files/%s.msu", c.Params("winver")))
 }
