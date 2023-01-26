@@ -19,7 +19,7 @@ services:
     ports:
       - 80:9999
     volumes:
-      - ./web:/go/src
+      - ./web:/go/src/App
     command: sleep infinity
     depends_on:
       - db

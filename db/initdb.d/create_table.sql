@@ -1,9 +1,9 @@
-CREATE TABLE GoAPIService.update_log (
+CREATE TABLE GoAPIService.update_logs (
     host_ip VARCHAR(45) NOT NULL,
     host_name VARCHAR(255),
     winver VARCHAR(10),
     buildver VARCHAR(45),
-    updated_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     result TINYINT
 );
 /*
@@ -11,13 +11,13 @@ CREATE TABLE GoAPIService.update_log (
     insert into GoAPIService.update_log values ("2.1.1.2", "test_name", "winver", "buildver", default, 0);
 */
 
-CREATE TABLE GoAPIService.target_winver (
+CREATE TABLE GoAPIService.target_winvers (
 	winver VARCHAR(10),
     buildver VARCHAR(45),
     kbNumber VARCHAR(45)
 );
 
-insert into	GoAPIService.target_winver
+insert into	GoAPIService.target_winvers
 values
 	("1803", "17134.2208", "KB5003174"),
 	("1809", "17763.3653", "KB5021655"),
