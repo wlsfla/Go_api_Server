@@ -32,7 +32,7 @@ func main() {
 	// set log file
 	app.Use(logger.New(logger.Config{
 		// For more options, see the Config section
-		Format:     "${time}\t|${ip}\t|${port}\t|${status}\t|${method}\t|${path}\n",
+		Format:     "${time}\t${ip}\t${status}\t${method}\t${path}\n",
 		TimeFormat: "2006-01-02|15:04:05",
 		TimeZone:   "Asia/Seoul",
 		Output:     io.MultiWriter(file, os.Stdout), // write file and stdout
@@ -41,20 +41,20 @@ func main() {
 	// ************************************************************************************
 	// refactoring
 
-	app.Get("/", api_handler.Download_UpdateDownloader)
-	app.Get("/cdn/chartjs", api_handler.Download_Chartjs) // http://localhost/cdn/chartjs
-	app.Get("/file/:winver", api_handler.Download_updatefile)
+	// app.Get("/", api_handler.Download_UpdateDownloader)
+	// app.Get("/file/:winver", api_handler.Download_updatefile)
 
-	api := app.Group("/api")
-	v2 := api.Group("/v2")
-	SetRoutes(&v2)
+	// api := app.Group("/api")
+	// v2 := api.Group("/v2")
+	// SetRoutes(&v2)
 
-	app.Get("/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + server_ip + "/cdn/chartjs"}))
+	SetStaticAsset(app)
+
+	app.Get("/", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + server_ip + "/static/js/Chart.bundle.min.js"}))
 	log.Fatal(app.Listen(":9999")) // http://localhost:9999/
 }
 
-func SetRoutes(app *fiber.Router) {
-
+func SetRoutes(app *fiber.App) {
 	app.Get("/test", func(c *fiber.Ctx) error {
 		return c.SendString("api test")
 	})
@@ -73,6 +73,12 @@ func SetRoutes(app *fiber.Router) {
 	//		result=${result}
 }
 
-func SetStaticFiles() {
+func SetStaticAsset(app *fiber.App) {
+	app.Static("/static", "./static")
+	/*
+		/static/files/test.txt
+		/static/js/Chart.bundle.min.js
 
+		/static/files/win_update.zip
+	*/
 }

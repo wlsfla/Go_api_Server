@@ -1,6 +1,8 @@
 package models
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+)
 
 type Hostinfo struct {
 	Host_ip   string

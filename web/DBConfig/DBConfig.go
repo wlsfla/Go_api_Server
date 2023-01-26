@@ -4,21 +4,24 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/gorm"
+	// _ "github.com/go-sql-driver/mysql"
 )
 
-var dbobj *sql.DB
-var schemaStr string
+var (
+	DBConn    *gorm.DB
+	schemaStr string
+)
 
 func init() {
 	schemaStr = "apiuser:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService"
-	dbobj = getDBConn()
+	DBConn = getDBConn()
 	connTest()
 }
 
 func connTest() {
 	var version string
-	dbobj.QueryRow("SELECT VERSION()").Scan(&version)
+	DBConn.QueryRow("SELECT VERSION()").Scan(&version)
 	fmt.Println("Connected to:", version)
 }
 
@@ -31,19 +34,19 @@ func getDBConn() *sql.DB {
 }
 
 func Close() {
-	dbobj.Close()
+	DBConn.Close()
 }
 
 func Insert(query string) {
-	dbobj.Exec(query)
+	DBConn.Exec(query)
 }
 
 func Update(query string) {
-	dbobj.Exec(query)
+	DBConn.Exec(query)
 }
 
 func Select(query string) *sql.Rows {
-	rows, _ := dbobj.Query("select * from GoAPIService.target_winver")
+	rows, _ := DBConn.Query(query)
 
 	return rows
 }

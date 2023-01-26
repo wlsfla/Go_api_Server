@@ -13,7 +13,7 @@ var Winverlist map[string]string
 
 func Init() {
 	// winverlist = getTarget_winver()
-	init_winverlist()
+	// init_winverlist()
 }
 
 func GetBuildVer(c *fiber.Ctx) error {
