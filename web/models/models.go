@@ -1,23 +1,26 @@
 package models
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"time"
+
+	"gorm.io/gorm"
 )
 
-type Hostinfo struct {
-	Host_ip   string
-	Host_name string
-	Winver    string
-	Build_ver string
-	Result    string
+type Update_Log struct {
+	gorm.Model
+
+	Host_ip      string    `json:"host_ip"`
+	Host_name    string    `json:"host_name"`
+	Winver       string    `json:"winver"`
+	Build_ver    string    `json:"buildver"`
+	Updated_time time.Time `json:"updated_time"`
+	Result       int       `json:"title"`
 }
 
-func New_Hostinfo(c *fiber.Ctx) *Hostinfo {
-	return &Hostinfo{
-		c.IP(),
-		c.Query("host_name"),
-		c.Query("winver"),
-		c.Query("buildver"),
-		c.Query("result"),
-	}
+type Target_winver struct {
+	gorm.Model
+
+	Winver   string `json:"winver"`
+	Buildver string `json:"buildver"`
+	KbNumber string `json:"kbNumber"`
 }

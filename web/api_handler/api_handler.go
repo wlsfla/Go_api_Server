@@ -1,10 +1,8 @@
 package api_handler
 
 import (
-	db "app/DBConfig"
-	models "app/models"
-	"fmt"
-	"log"
+	"app/DBConfig"
+	"app/models"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -23,43 +21,14 @@ func GetBuildVer(c *fiber.Ctx) error {
 	})
 }
 
-func init_winverlist() {
-	Winverlist = make(map[string]string)
-	var winver, name string
-	rows := db.Select("select * from GoAPIService.target_winver")
-
-	for rows.Next() {
-		err := rows.Scan(&winver, &name)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		Winverlist[winver] = name
+func Test(c *fiber.Ctx) error {
+	updatelog := new(models.Update_Log)
+	updatelog.
+	if err := c.BodyParser(updatelog); err != nil {
+		return c.Status(400).JSON(err.Error())
 	}
-}
 
-func InsertHostinfo(c *fiber.Ctx) error {
-	info := models.New_Hostinfo(c)
-	query := fmt.Sprintf("insert into GoAPIService.update_log values(%s, %s, %s, default, default, %s)", info.Host_ip, info.Host_name, info.Winver, info.Result)
-	db.Update(query)
+	DBConfig.DBconn.Create(&updatelog)
 
-	return c.SendStatus(200)
-}
-
-func UpdateHostinfo(c *fiber.Ctx) error {
-	// /insert/info/
-	// 		buildver=${buildver}&
-	// 		result=${result}
-
-	info := models.New_Hostinfo(c)
-	query := fmt.Sprintf("UPDATE GoAPIService.update_info SET result=%s  WHERE host_ip='%s'", info.Result, info.Host_ip)
-	db.Update(query)
-
-	return c.SendStatus(200)
-}
-
-func v2(api *fiber.Router) fiber.Router {
-	// v2 := api.Group("/v2")
-
-	return nil
+	return c.Status(200).JSON(updatelog)
 }

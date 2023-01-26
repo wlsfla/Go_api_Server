@@ -1,52 +1,33 @@
 package DBConfig
 
 import (
-	"database/sql"
-	"fmt"
-
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	// _ "github.com/go-sql-driver/mysql"
 )
 
 var (
-	DBConn    *gorm.DB
+	DBconn    *gorm.DB
 	schemaStr string
 )
 
-func init() {
+func Init() {
 	schemaStr = "apiuser:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService"
-	DBConn = getDBConn()
-	connTest()
+	DBconn = getDBConn()
 }
 
-func connTest() {
-	var version string
-	DBConn.QueryRow("SELECT VERSION()").Scan(&version)
-	fmt.Println("Connected to:", version)
-}
-
-func getDBConn() *sql.DB {
+func getDBConn() *gorm.DB {
 	// if using mariaDB on docker-container, You have to change ip address "host.docker.internal"
 	// issue https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host
-	db, _ := sql.Open("mysql", schemaStr)
+	db, _ := gorm.Open(mysql.Open(schemaStr), &gorm.Config{})
 
 	return db
 }
 
-func Close() {
-	DBConn.Close()
-}
-
 func Insert(query string) {
-	DBConn.Exec(query)
+	DBconn.Exec(query)
 }
 
 func Update(query string) {
-	DBConn.Exec(query)
-}
-
-func Select(query string) *sql.Rows {
-	rows, _ := DBConn.Query(query)
-
-	return rows
+	DBconn.Exec(query)
 }
