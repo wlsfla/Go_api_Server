@@ -86,3 +86,36 @@ result| `0: 미수행`,`1: 성공`, `2: 오류`, `3: 해당없음`
 			- Target 버전보다 빌드 버전이 높고, KB5020030 업데이트가 없다.
 			- 실제 업데이트 수행 시 적용 불가하다.
 
+
+
+
+========================================================================
+
+
+* Post /api/v2/insert/updatelog
+	- insert data
+* Get /api/v2/winver/:winver
+
+
+A. Checker
+	** 최초 1회 직접 수행.
+	** 작업 스케줄러에 등록
+		- At windows log on
+	
+	1) PC 정보 수집
+	2) 업데이트 여부 검사
+		a) Target Buildver Get
+		b) status가 0이면 업데이트 불가
+		c) currBuildver is
+			Lower Then => result = 1
+			Else => result = 9
+	3) 점검 결과 전송
+	
+B. Updater
+	업데이트 점검 여부 검사 로직 후
+	result가 1이면 업데이트 수행
+	
+	업데이트 로직
+	result == 1 Then
+		Downloader
+		

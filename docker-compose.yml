@@ -3,6 +3,7 @@ version: "3"
 services:
   db:
     image: mariadb:10.9.4
+    container_name: DB
     ports:
       - 3306:3306
     volumes:
@@ -16,6 +17,7 @@ services:
 
   web:
     image: golang:1.19.4
+    container_name: API_Server
     ports:
       - 80:9999
     volumes:

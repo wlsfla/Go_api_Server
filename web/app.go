@@ -38,11 +38,13 @@ func main() {
 	// SetRoutes(&v2)
 
 	app := fiber.New()
-	app.Mount("/api/v2", api_handler.Apiv2())
+	app.Mount("/api/v2", api_handler.Apiv2Router())
 
 	SetStaticAsset(app)
 
-	app.Get("/", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + server_ip + "/static/js/Chart.bundle.min.js"}))
+	app.Get("/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + server_ip + "/static/js/Chart.bundle.min.js"}))
+
+	app.Get("/", SetMonitorAccessControl)
 
 	// set log file
 	app.Use(logger.New(logger.Config{
@@ -53,7 +55,15 @@ func main() {
 		Output:     io.MultiWriter(file, os.Stdout), // write file and stdout
 	}))
 
-	log.Fatal(app.Listen(":9999")) // http://localhost:9999/
+	log.Fatal(app.Listen(":9999"))
+}
+
+func SetMonitorAccessControl(c *fiber.Ctx) error {
+	if ip := c.IP(); ip != "172.22.0.1" {
+		return c.SendStatus(404)
+	}
+
+	return c.Redirect("/monitor")
 }
 
 func SetStaticAsset(app *fiber.App) {

@@ -3,7 +3,6 @@ package api_handler
 import (
 	"app/DBConfig"
 	"app/models"
-	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -14,32 +13,40 @@ var (
 
 func Init() {
 	initWinverList()
-	// init_winverlist()
 }
 
-func GetBuildVer(c *fiber.Ctx) error {
-	resp := c.AllParams()
-	if resp == nil {
-		return c.Status(400).JSON(fiber.Map{
-			"result":   0,
-			"buildver": nil,
-		})
+func getBuildVer(c *fiber.Ctx) error {
+	result := fiber.Map{
+		"status":   0,
+		"buildver": 0,
 	}
 
-	fmt.Println(Winverlist)
-	buildver := Winverlist[resp["winver"]]
+	resp := c.AllParams()
+	if resp == nil {
+		return c.JSON(result)
+	}
 
-	return c.JSON(fiber.Map{
-		"result":   1,
-		"buildver": buildver,
-	})
+	buildver, exists := Winverlist[resp["winver"]]
+
+	if !exists {
+		return c.JSON(result)
+	}
+
+	result["status"] = 1
+	result["buildver"] = buildver
+
+	return c.JSON(result)
 }
 
 func initWinverList() {
-	// Winverlist :=
+	Winverlist = make(map[string]string)
 
 	list := []models.Target_winvers{}
 	DBConfig.DBconn.Find(&list)
+
+	for _, v := range list {
+		Winverlist[v.Winver] = v.Buildver
+	}
 }
 
 func insertinfo(c *fiber.Ctx) error {
@@ -53,15 +60,11 @@ func insertinfo(c *fiber.Ctx) error {
 	return c.Status(200).JSON(updatelog)
 }
 
-func Apiv2() *fiber.App {
+func Apiv2Router() *fiber.App {
 	app := fiber.New()
 
-	app.Get("/test", func(c *fiber.Ctx) error {
-		return c.SendString("api test")
-	})
-
-	app.Post("/updatelog", insertinfo)
-	app.Get("/winver/:winver", GetBuildVer)
+	app.Post("/insert/updatelog", insertinfo)
+	app.Get("/winver/:winver", getBuildVer)
 
 	return app
 }
@@ -78,7 +81,7 @@ func Apiv2() *fiber.App {
 //		result=${result}
 
 // test
-// POST http://localhost/api/v2/updatelog HTTP/1.1
+// POST http://localhost/api/v2/updatelog
 // content-type: application/json
 
 // {
