@@ -81,27 +81,27 @@ result| `0: 미수행`,`1: 성공`, `2: 오류`, `3: 해당없음`
 ========================================================================
 
 
-A. Checker
-	** 최초 1회 직접 수행.
-	** 작업 스케줄러에 등록
-		- At windows log on
-	
-	1) PC 정보 수집
-	2) 업데이트 여부 검사
-		a) Target Buildver Get
-		b) status가 0이면 업데이트 불가
-		c) currBuildver is
-			Lower Then => result = 1
-			Else => result = 9
-	3) 점검 결과 전송
-	
-B. Updater
-	업데이트 점검 여부 검사 로직 후
-	result가 1이면 업데이트 수행
-	
-	업데이트 로직
-	result == 1 Then
-		Downloader
+
+** 윈도우 Client 구성
+
+	A) Task Manager: 이용자가 직접 수행
+		1) B),C)를 서버로부터 다운로드. task 등록한다.
+			- B) 시간마다 실행
+			- C) PC 로그인할 때 실행
+		2) C 파일을 실행한다.(파일 유무 검사 필수)
+		3) "업데이트 작업 완료." 메시지 박스 시현.
+		종료
+
+	B) File Downloader
+		1) 서버에 파일 다운로드 가능 API 요청(Get)
+		2) status == 1 then url 필드의 addr에 파일 다운로드 시작
+		3) status == 0 then.
+		종료
+
+	C) pc info checker
+		1) pc 정보를 수집한다.
+		2) 서버에 insert 요청을 한다.(Post)
+		종료
 		
 =====================================================================
 
