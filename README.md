@@ -1,46 +1,38 @@
 
 ## A. 개요
----
 windows desktop 대상 각각 version 별 업데이트 파일을 다르게 하고 결과 log를 종합하는 porject
 
-## B. 구성 요소
----
-- Client: Cmd 실행 - ps1 파일 다운로드/실행
-- Api Server: 실제 데이터 처리의 중심이 되는 Gateway.
-- C-가. 세부 업데이트 프로세스 로직이 처리되는 파일을 제공한다. 파일에 문제가 생겼을 경우 서버측 파일만 바꿔주고 Client는 cmd 파일만 다시 실행하면 된다.
-- C-나, C-다. input value에 대한 DB insert를 수행.
-. File Server: 제공하고자 하는 파일 url이 저장된 서버
-. DB: Api Server로부터 들어온 값을 저장.(C-나, C-다. 참고)
+## B. 구성
+
 	
 ## C. Api Description.
----
-- ps1 file request.
-	* iuput: `[get]` /update/ps
-	* output:
-	    ```
-			return powershell file
-        ```
-	
-- info register
-	* iuput: `[post]` /api/info_reg/`:hostname`/`:winver`
-	* output:
+- Client info Regist
+	* input `post` /api/v2/insert/updatelog
 		```json
 		{
-			data:{
-				url:{
-					{:url1},{:url2},{:url3}
-				}
-			}
-			state:1
+			"Host_ip": "1.1.1.1",
+			"Host_name": "dummy_name",
+			"Winver": "22H1",
+			"Buildver": "19044.2486",
+			"Result": 0
+		}
+		
+        ```
+	* output
+	    ```json
+		{
+			"host_ip": "1.1.1.1",
+			"host_name": "dummy_name",
+			"winver": "22H1",
+			"buildver": "19044.2486",
+			"updated_time": "0001-01-01T00:00:00Z",
+			"Result": 0
 		}
         ```
 	
-- Result Report
-	* iuput: `[post]` /api/result/`:result`
-	* output: `None`
+
 
 ## D. DB Description
----
 ### [table] host_info
 |Attr Name|Desc|-|
 |-|-|-|
@@ -54,8 +46,6 @@ result| `0: 미수행`,`1: 성공`, `2: 오류`, `3: 해당없음`
 
 
 ## E. Update Version Check Logic
----
-
 - if (현재 시스템의 winver이 1803이면)
 	- return 수동 업데이트
 - if (현재 시스템의 빌드버전이 같으면)
@@ -69,7 +59,6 @@ result| `0: 미수행`,`1: 성공`, `2: 오류`, `3: 해당없음`
 - Finaly : 업데이트 스케줄러 등록
 
 ## F. update file list
----
 |OS Ver.|KB Update Ver.|Build Ver.(After Update)|
 |-|-|-|
 |1803.msu|KB5003174|17134.2208|
@@ -90,11 +79,6 @@ result| `0: 미수행`,`1: 성공`, `2: 오류`, `3: 해당없음`
 
 
 ========================================================================
-
-
-* Post /api/v2/insert/updatelog
-	- insert data
-* Get /api/v2/winver/:winver
 
 
 A. Checker

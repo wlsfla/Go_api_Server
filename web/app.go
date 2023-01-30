@@ -1,8 +1,9 @@
 package main
 
 import (
-	db "app/DBConfig"
-	api_handler "app/api_handler"
+	"app/DBConfig"
+	"app/api_handler"
+	"app/common"
 	"io"
 	"log"
 	"os"
@@ -15,10 +16,8 @@ import (
 var server_ip string
 
 func main() {
-	db.Init()
+	DBConfig.Init()
 	api_handler.Init()
-
-	server_ip = "127.0.0.1"
 
 	// accesslog write
 	file, err := os.OpenFile("access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -42,9 +41,7 @@ func main() {
 
 	SetStaticAsset(app)
 
-	app.Get("/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + server_ip + "/static/js/Chart.bundle.min.js"}))
-
-	app.Get("/", SetMonitorAccessControl)
+	app.Get("/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + common.Server_ip + "/static/js/Chart.bundle.min.js"}))
 
 	// set log file
 	app.Use(logger.New(logger.Config{
@@ -58,20 +55,11 @@ func main() {
 	log.Fatal(app.Listen(":9999"))
 }
 
-func SetMonitorAccessControl(c *fiber.Ctx) error {
-	if ip := c.IP(); ip != "172.22.0.1" {
-		return c.SendStatus(404)
-	}
-
-	return c.Redirect("/monitor")
-}
-
 func SetStaticAsset(app *fiber.App) {
 	app.Static("/static", "./static")
 	/*
-		/static/files/test.txt
 		/static/js/Chart.bundle.min.js
-
 		/static/files/win_update.zip
+
 	*/
 }

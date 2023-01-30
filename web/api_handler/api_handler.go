@@ -2,23 +2,30 @@ package api_handler
 
 import (
 	"app/DBConfig"
+	"app/common"
 	"app/models"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 var (
-	Winverlist map[string]string
+	Winverlist        map[string]string
+	updatefileUrlList map[string]string
 )
 
 func Init() {
 	initWinverList()
 }
 
+// Request OS Version
+// Return Matched Build Version
 func getBuildVer(c *fiber.Ctx) error {
-	result := fiber.Map{
-		"status":   0,
-		"buildver": 0,
+	result := models.Winver_info{
+		Status:   0,
+		Winver:   "",
+		Buildver: "",
+		Url:      "",
 	}
 
 	resp := c.AllParams()
@@ -26,26 +33,30 @@ func getBuildVer(c *fiber.Ctx) error {
 		return c.JSON(result)
 	}
 
-	buildver, exists := Winverlist[resp["winver"]]
+	result.Winver = resp["winver"]
+	buildver, exists := Winverlist[result.Winver]
 
 	if !exists {
 		return c.JSON(result)
 	}
 
-	result["status"] = 1
-	result["buildver"] = buildver
+	result.Status = 1
+	result.Buildver = buildver
+	result.Url = updatefileUrlList[result.Winver]
 
 	return c.JSON(result)
 }
 
 func initWinverList() {
 	Winverlist = make(map[string]string)
+	updatefileUrlList = make(map[string]string)
 
 	list := []models.Target_winvers{}
 	DBConfig.DBconn.Find(&list)
 
 	for _, v := range list {
 		Winverlist[v.Winver] = v.Buildver
+		updatefileUrlList[v.Winver] = fmt.Sprintf("http://" + common.Server_ip + "/static/files/" + v.Winver + ".msu")
 	}
 }
 
@@ -60,6 +71,7 @@ func insertinfo(c *fiber.Ctx) error {
 	return c.Status(200).JSON(updatelog)
 }
 
+// API v2 Main Routing
 func Apiv2Router() *fiber.App {
 	app := fiber.New()
 
@@ -68,26 +80,3 @@ func Apiv2Router() *fiber.App {
 
 	return app
 }
-
-// app.Get("/insert/info", api_handler.InsertHostinfo)
-// app.Get("/update/info", api_handler.UpdateHostinfo)
-
-// /updateinfo?
-// 		host_name=${host_name}&
-//		winver=${winver}&
-//		buildver=${buildver}&
-//		created_time=${created_time}&
-//		updated_time=${updated_time}&
-//		result=${result}
-
-// test
-// POST http://localhost/api/v2/updatelog
-// content-type: application/json
-
-// {
-//     "Host_ip": "1.1.1.1",
-//     "Host_name": "test_name",
-//     "Winver": "22H1",
-//     "Buildver": "19044.2486",
-//     "Result": 0
-// }
