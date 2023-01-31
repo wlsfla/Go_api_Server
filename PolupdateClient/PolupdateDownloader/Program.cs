@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -23,20 +20,9 @@ namespace PolupdateDownloader
 		{
 			string server_ip = GetServerip(args);
 
-			var searcher = new ManagementObjectSearcher(
-			@"Select * From Win32_USBHub");
-			ManagementObjectCollection collection = searcher.Get();
-			foreach (var device in collection)
-			{
-				devices.Add(new USBDeviceInfo(
-					(string)device.GetPropertyValue("DeviceID"),
-					(string)device.GetPropertyValue("PNPDeviceID"),
-					(string)device.GetPropertyValue("Description")
-					));
-			}
+			DownloadFile(server_ip);
 
-			//DownloadFile(server_ip);
-
+			Console.WriteLine("End");
 			Console.ReadKey();
 		}
 
@@ -53,7 +39,9 @@ namespace PolupdateDownloader
 
 				string file_download_url = (string)jobj["url"];
 
-				//wc.DownloadFile(file_download_url, );
+				wc.DownloadFile(file_download_url,
+					System.IO.Path.Combine(Common.PolPath, $"{GetWinver()}.exe")
+					);
 			}
 		}
 

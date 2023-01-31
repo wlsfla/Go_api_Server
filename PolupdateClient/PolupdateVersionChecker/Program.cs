@@ -10,10 +10,8 @@ namespace PolupdateVersionChecker
 	{
 		static void Main(string[] args)
 		{
-			Request(GetServerip(args));
-
-			Console.WriteLine("End");
-			Console.ReadKey();
+			string Severip = GetServerip(args);
+			Request(Severip);
 		}
 
 		static string GetServerip(string[] args)
