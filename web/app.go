@@ -59,6 +59,7 @@ func SetStaticAsset(app *fiber.App) {
 	app.Static("/static", "./static")
 	/*
 		/static/js/Chart.bundle.min.js
+		/static/files/21H2.msu
 		/static/files/win_update.zip
 
 	*/

@@ -2,6 +2,7 @@
 using System.Text;
 using System.Net;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace PolupdateVersionChecker
 {
@@ -9,51 +10,35 @@ namespace PolupdateVersionChecker
 	{
 		static void Main(string[] args)
 		{
-			SetPolUpdatePath();
-			SetTaskScheduler();
+			Request(GetServerip(args));
 
-			System.Windows.Forms.MessageBox.Show("[info] 업데이트 작업 등록 완료.");
+			Console.WriteLine("End");
+			Console.ReadKey();
 		}
 
-		static void GetUpdateFileDownload()
+		static string GetServerip(string[] args)
 		{
-			string url_downloader = string.Empty;
-			string url_versionchker = string.Empty;
+			if (args.Length != 1)
+				return "127.0.0.1";
 
-			WebClient wc = new WebClient();
-			wc.DownloadFile(url_versionchker, Common.PolPath);
-			wc.DownloadFile(url_downloader, Common.PolPath);
-
-
-
+			return args[0];
 		}
 
-		static void SetTaskScheduler()
+		static void Request(string server_ip)
 		{
-			return;
-		}
+			string url = $"http://{server_ip}/api/v2/insert/updatelog";
 
-		static void SetPolUpdatePath()
-		{
-			string polPath = Path.Combine(
-				Environment.GetEnvironmentVariable("userprofile"),
-				"polupdate");
+			var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+			httpWebRequest.ContentType = VersionChkHandler.JSON_HEADER;
+			httpWebRequest.Method = "POST";
 
-			// 디렉토리 없으면 만들고
-			if (!Directory.Exists(polPath))
-				Directory.CreateDirectory(polPath);
+			using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+			{
+				string json = JsonConvert.SerializeObject(VersionChkHandler.GetPCinfo());
+				streamWriter.Write(json);
+			}
 
-			//Application.StartupPath
-			if (!Directory.Exists(Common.PolPath))
-				Directory.CreateDirectory(Common.PolPath);
-
-			
-			// 파일 없으면 복사
-			string targetPath = Path.Combine(polPath, Path.GetFileName(System.Windows.Forms.Application.ExecutablePath));
-			if (!File.Exists(targetPath))
-				File.Copy(System.Windows.Forms.Application.ExecutablePath, targetPath);
-			if (!File.Exists(Common.PolExecPath))
-				File.Copy(Common.NowExecPath, Common.PolExecPath);
+			var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
 		}
 	}
 }

@@ -66,6 +66,8 @@ func insertinfo(c *fiber.Ctx) error {
 		return c.Status(400).JSON(err.Error())
 	}
 
+	updatelog.Host_ip = c.IP()
+
 	DBConfig.DBconn.Create(&updatelog)
 
 	return c.Status(200).JSON(updatelog)

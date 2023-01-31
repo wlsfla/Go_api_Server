@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace PolupdateVersionChecker
+namespace PolupdateTaskManager
 {
 	internal class Common
 	{
@@ -18,12 +22,12 @@ namespace PolupdateVersionChecker
 		/// <summary>
 		/// 현재 실행 파일 전체 경로
 		/// </summary>
-		public static string NowExecPath{ get; }
+		public static string NowExecPath { get; }
 
 		/// <summary>
 		/// 현재 실행 파일 폴더
 		/// </summary>
-		public static string NowExecDir{ get; }
+		public static string NowExecDir { get; }
 
 		static Common()
 		{
