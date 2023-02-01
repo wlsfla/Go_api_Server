@@ -12,10 +12,13 @@ import (
 var (
 	Winverlist        map[string]string
 	updatefileUrlList map[string]string
+	CurrConnPool      chan uint
+	MaxConnPool       uint
 )
 
 func Init() {
 	initWinverList()
+	MaxConnPool = 20
 }
 
 // Request OS Version
@@ -73,12 +76,37 @@ func insertinfo(c *fiber.Ctx) error {
 	return c.Status(200).JSON(updatelog)
 }
 
+func getupdatefile(c *fiber.Ctx) error {
+
+	return nil
+}
+
+func getCurrConnPool(c *fiber.Ctx) error {
+	// /connpool
+
+	return nil
+}
+
+func changeConnPool(c *fiber.Ctx) error {
+	// /connpool/max/:value
+
+	return nil
+}
+
 // API v2 Main Routing
 func Apiv2Router() *fiber.App {
 	app := fiber.New()
 
 	app.Post("/insert/updatelog", insertinfo)
 	app.Get("/winver/:winver", getBuildVer)
+	app.Get("/file/:winver", getupdatefile)
+
+	app.Get("/connpool", getCurrConnPool)
+	app.Get("/connpool/max/:value", changeConnPool)
+
+	// CurrConnPool info 가져오는지
+	// MaxConnPool 변경
+	// MaxConnPool 검사
 
 	return app
 }
