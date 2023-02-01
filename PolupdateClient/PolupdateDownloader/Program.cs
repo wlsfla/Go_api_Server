@@ -21,9 +21,6 @@ namespace PolupdateDownloader
 			string server_ip = GetServerip(args);
 
 			DownloadFile(server_ip);
-
-			Console.WriteLine("End");
-			Console.ReadKey();
 		}
 
 		static void DownloadFile(string server_ip)

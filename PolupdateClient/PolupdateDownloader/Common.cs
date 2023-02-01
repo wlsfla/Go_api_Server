@@ -39,10 +39,9 @@ namespace PolupdateDownloader
 
 		static Common()
 		{
-			polpath = Path.Combine(Environment.GetEnvironmentVariable("userprofile"), "polupdate");
-
-			string versionDir = "202212"
-			string filename = System.Windows.Forms.Application.ProductName + "_202212" + ".exe"; // PolupdateDownloader_202212.exe
+			string version = "202212";
+			polpath = Path.Combine(Environment.GetEnvironmentVariable("userprofile"), "polupdate", version);
+			string filename = System.Windows.Forms.Application.ProductName + ".exe"; // PolupdateDownloader_202212.exe
 			PolExecPath = Path.Combine(polpath, filename);
 			CurrExecPath = System.Windows.Forms.Application.ExecutablePath;
 			CurrExecDir = System.Windows.Forms.Application.StartupPath;
