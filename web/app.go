@@ -1,10 +1,10 @@
 package main
 
 import (
-	// _ "app/DBConfig"
+	// _ "app/LibDBConfig"
 	"app/Lib/Logging"
-	"app/api_handler"
-	"app/common"
+	"app/Lib/api_handler"
+	"app/Lib/common"
 	"io"
 	"log"
 	"os"

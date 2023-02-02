@@ -1,10 +1,10 @@
 package api_handler
 
 import (
-	"app/ConnManager"
-	"app/DBConfig"
-	"app/common"
-	"app/models"
+	"app/Lib/ConnManager"
+	"app/Lib/DBConfig"
+	"app/Lib/common"
+	"app/Lib/models"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,13 +13,10 @@ import (
 var (
 	Winverlist        map[string]string
 	updatefileUrlList map[string]string
-	CurrConnPool      chan uint
-	MaxConnPool       uint
 )
 
 func init() {
-	initWinverList()
-	MaxConnPool = 20
+
 }
 
 // Request OS Version
@@ -77,45 +74,16 @@ func insertinfo(c *fiber.Ctx) error {
 	return c.Status(200).JSON(updatelog)
 }
 
-func getupdatefile(c *fiber.Ctx) error {
-
-	return nil
-}
-
-func getCurrConnPool(c *fiber.Ctx) error {
-	// /connpool/info
-
-	return c.JSON(fiber.Map{
-		"status":    1,
-		"CurrCount": ConnManager.CurrConnCount,
-		"MaxCount":  ConnManager.MaxConnCount,
-	})
-}
-
-func changeConnPool(c *fiber.Ctx) error {
-	// /connpool/max/:value
-
-	a, _ := c.ParamsInt("value")
-
-	ConnManager.SetMaxConnCount(uint(a))
-
-	return c.JSON(fiber.Map{
-		"status":    1,
-		"CurrCount": ConnManager.CurrConnCount,
-		"MaxCount":  ConnManager.MaxConnCount,
-	})
-}
-
 // API v2 Main Routing
 func Apiv2Router() *fiber.App {
 	app := fiber.New()
 
 	app.Post("/insert/updatelog", insertinfo)
 	app.Get("/winver/:winver", getBuildVer)
-	app.Get("/file/:winver", getupdatefile)
+	app.Get("/file/:winver", ConnManager.Getupdatefile)
 
-	app.Get("/connpool/info", getCurrConnPool)
-	app.Get("/connpool/max/:value", changeConnPool)
+	app.Get("/connpool/info", ConnManager.GetConnInfo)
+	app.Get("/connpool/max/:value", ConnManager.ChangeConnPool)
 
 	// CurrConnPool info 가져오는지
 	// MaxConnPool 변경
