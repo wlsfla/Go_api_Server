@@ -1,6 +1,8 @@
 package DBConfig
 
 import (
+	"fmt"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	// _ "github.com/go-sql-driver/mysql"
@@ -11,7 +13,8 @@ var (
 	schemaStr string
 )
 
-func Init() {
+func init() {
+	fmt.Println("\t[*] init DBConfig")
 	schemaStr = "apiuser:1q2w3e4r!@tcp(host.docker.internal:3306)/GoAPIService"
 	DBconn = getDBConn()
 }

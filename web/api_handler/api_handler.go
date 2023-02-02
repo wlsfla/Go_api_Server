@@ -1,6 +1,7 @@
 package api_handler
 
 import (
+	"app/ConnManager"
 	"app/DBConfig"
 	"app/common"
 	"app/models"
@@ -16,7 +17,7 @@ var (
 	MaxConnPool       uint
 )
 
-func Init() {
+func init() {
 	initWinverList()
 	MaxConnPool = 20
 }
@@ -82,15 +83,27 @@ func getupdatefile(c *fiber.Ctx) error {
 }
 
 func getCurrConnPool(c *fiber.Ctx) error {
-	// /connpool
+	// /connpool/info
 
-	return nil
+	return c.JSON(fiber.Map{
+		"status":    1,
+		"CurrCount": ConnManager.CurrConnCount,
+		"MaxCount":  ConnManager.MaxConnCount,
+	})
 }
 
 func changeConnPool(c *fiber.Ctx) error {
 	// /connpool/max/:value
 
-	return nil
+	a, _ := c.ParamsInt("value")
+
+	ConnManager.SetMaxConnCount(uint(a))
+
+	return c.JSON(fiber.Map{
+		"status":    1,
+		"CurrCount": ConnManager.CurrConnCount,
+		"MaxCount":  ConnManager.MaxConnCount,
+	})
 }
 
 // API v2 Main Routing
@@ -101,7 +114,7 @@ func Apiv2Router() *fiber.App {
 	app.Get("/winver/:winver", getBuildVer)
 	app.Get("/file/:winver", getupdatefile)
 
-	app.Get("/connpool", getCurrConnPool)
+	app.Get("/connpool/info", getCurrConnPool)
 	app.Get("/connpool/max/:value", changeConnPool)
 
 	// CurrConnPool info 가져오는지

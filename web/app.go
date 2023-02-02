@@ -1,7 +1,8 @@
 package main
 
 import (
-	"app/DBConfig"
+	// _ "app/DBConfig"
+	"app/Lib/Logging"
 	"app/api_handler"
 	"app/common"
 	"io"
@@ -13,18 +14,16 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 )
 
-var server_ip string
-
 func main() {
-	DBConfig.Init()
-	api_handler.Init()
+
+	Logging.Test()
 
 	// accesslog write
-	file, err := os.OpenFile("access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	fileptr, err := os.OpenFile("access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
-	defer file.Close()
+	defer fileptr.Close()
 
 	// ************************************************************************************
 	// refactoring
@@ -49,7 +48,7 @@ func main() {
 		Format:     "${time}\t${ip}\t${status}\t${method}\t${path}\n",
 		TimeFormat: "2006-01-02|15:04:05",
 		TimeZone:   "Asia/Seoul",
-		Output:     io.MultiWriter(file, os.Stdout), // write file and stdout
+		Output:     io.MultiWriter(fileptr, os.Stdout), // write file and stdout
 	}))
 
 	log.Fatal(app.Listen(":9999"))
