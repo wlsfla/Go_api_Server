@@ -3,7 +3,7 @@ package main
 import (
 	// _ "app/LibDBConfig"
 	"app/Lib/Logging"
-	"app/Lib/api_handler"
+	"app/Lib/api_router"
 	"app/Lib/common"
 	"io"
 	"log"
@@ -16,14 +16,7 @@ import (
 
 func main() {
 
-	Logging.Test()
-
-	// accesslog write
-	fileptr, err := os.OpenFile("access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("error opening file: %v", err)
-	}
-	defer fileptr.Close()
+	defer Logging.Close()
 
 	// ************************************************************************************
 	// refactoring
@@ -36,10 +29,8 @@ func main() {
 	// SetRoutes(&v2)
 
 	app := fiber.New()
-	app.Mount("/api/v2", api_handler.Apiv2Router())
-
 	SetStaticAsset(app)
-
+	app.Mount("/api/v2", api_router.Apiv2Router())
 	app.Get("/monitor", monitor.New(monitor.Config{Title: "Service Metrics Page", ChartJsURL: "http://" + common.Server_ip + "/static/js/Chart.bundle.min.js"}))
 
 	// set log file
@@ -48,7 +39,7 @@ func main() {
 		Format:     "${time}\t${ip}\t${status}\t${method}\t${path}\n",
 		TimeFormat: "2006-01-02|15:04:05",
 		TimeZone:   "Asia/Seoul",
-		Output:     io.MultiWriter(fileptr, os.Stdout), // write file and stdout
+		Output:     io.MultiWriter(Logging.Fileptr, os.Stdout), // write file and stdout
 	}))
 
 	log.Fatal(app.Listen(":9999"))
@@ -60,6 +51,5 @@ func SetStaticAsset(app *fiber.App) {
 		/static/js/Chart.bundle.min.js
 		/static/files/21H2.msu
 		/static/files/win_update.zip
-
 	*/
 }

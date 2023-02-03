@@ -1,11 +1,21 @@
 package Logging
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
+
+var (
+	Fileptr *os.File
+)
 
 func init() {
-	fmt.Println("\t[*] init logging")
+	fmt.Println("\t[*] init Logging")
+
+	// accesslog write
+	Fileptr, _ = os.OpenFile("access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 }
 
-func Test() {
-	fmt.Println("\t[*] Call Logging")
+func Close() {
+	Fileptr.Close()
 }

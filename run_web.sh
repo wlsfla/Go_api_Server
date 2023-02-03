@@ -1,1 +1,1 @@
-docker exec -it API_Server /bin/bash
+docker exec -it --workdir "/go/src/App/" -it API_Server bash

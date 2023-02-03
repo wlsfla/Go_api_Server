@@ -20,13 +20,12 @@ func init() {
 func SetMaxConnCount(value uint) {
 	if value > 0 {
 		MaxConnCount = value
+		Showinfo()
 	}
-
-	Showinfo()
 }
 
 func Showinfo() {
-	fmt.Printf("[***] CurrConnCount: {%d} | MaxConnCount: {%d}", CurrConnCount, MaxConnCount)
+	fmt.Printf("[***] CurrConnCount: %d | MaxConnCount: %d\n", CurrConnCount, MaxConnCount)
 }
 
 func GetConnInfo(c *fiber.Ctx) error {
@@ -39,7 +38,24 @@ func GetConnInfo(c *fiber.Ctx) error {
 	})
 }
 
+func isCanDownload() bool {
+	if MaxConnCount >= CurrConnCount {
+		return false
+	} else {
+		return true
+	}
+}
+
 func Getupdatefile(c *fiber.Ctx) error {
+	// /file/:winver
+	if isCanDownload() {
+		winver := c.Params("winver")
+		// Api_handler.GetFileUrl(winver)
+
+		// fmt.Sprintf("http://" + common.Server_ip + "/static/files/" + v.Winver + ".msu")
+
+		return
+	}
 
 	return nil
 }

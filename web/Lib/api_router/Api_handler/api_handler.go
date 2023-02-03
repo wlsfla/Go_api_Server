@@ -1,7 +1,6 @@
-package api_handler
+package Api_handler
 
 import (
-	"app/Lib/ConnManager"
 	"app/Lib/DBConfig"
 	"app/Lib/common"
 	"app/Lib/models"
@@ -16,12 +15,17 @@ var (
 )
 
 func init() {
+	initWinverList()
 
+}
+
+func GetFileUrl(winver string) string {
+	return updatefileUrlList[winver]
 }
 
 // Request OS Version
 // Return Matched Build Version
-func getBuildVer(c *fiber.Ctx) error {
+func GetBuildVer(c *fiber.Ctx) error {
 	result := models.Winver_info{
 		Status:   0,
 		Winver:   "",
@@ -57,11 +61,11 @@ func initWinverList() {
 
 	for _, v := range list {
 		Winverlist[v.Winver] = v.Buildver
-		updatefileUrlList[v.Winver] = fmt.Sprintf("http://" + common.Server_ip + "/static/files/" + v.Winver + ".msu")
+		updatefileUrlList[v.Winver] = fmt.Sprintf("http://" + common.Server_ip + "/api/v2/file/" + v.Winver)
 	}
 }
 
-func insertinfo(c *fiber.Ctx) error {
+func Insertinfo(c *fiber.Ctx) error {
 	updatelog := new(models.Update_Logs)
 	if err := c.BodyParser(updatelog); err != nil {
 		return c.Status(400).JSON(err.Error())
@@ -72,22 +76,4 @@ func insertinfo(c *fiber.Ctx) error {
 	DBConfig.DBconn.Create(&updatelog)
 
 	return c.Status(200).JSON(updatelog)
-}
-
-// API v2 Main Routing
-func Apiv2Router() *fiber.App {
-	app := fiber.New()
-
-	app.Post("/insert/updatelog", insertinfo)
-	app.Get("/winver/:winver", getBuildVer)
-	app.Get("/file/:winver", ConnManager.Getupdatefile)
-
-	app.Get("/connpool/info", ConnManager.GetConnInfo)
-	app.Get("/connpool/max/:value", ConnManager.ChangeConnPool)
-
-	// CurrConnPool info 가져오는지
-	// MaxConnPool 변경
-	// MaxConnPool 검사
-
-	return app
 }
