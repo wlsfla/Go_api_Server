@@ -16,8 +16,6 @@ import (
 
 func main() {
 
-	defer Logging.Close()
-
 	// ************************************************************************************
 	// refactoring
 
@@ -41,6 +39,7 @@ func main() {
 		TimeZone:   "Asia/Seoul",
 		Output:     io.MultiWriter(Logging.Fileptr, os.Stdout), // write file and stdout
 	}))
+	defer Logging.Close()
 
 	log.Fatal(app.Listen(":9999"))
 }

@@ -19,6 +19,7 @@ func init() {
 
 }
 
+// Real Update File URL
 func GetFileUrl(winver string) string {
 	return updatefileUrlList[winver]
 }

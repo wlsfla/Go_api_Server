@@ -1,6 +1,7 @@
 package ConnManager
 
 import (
+	"app/Lib/api_router/Api_handler"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
@@ -50,14 +51,19 @@ func Getupdatefile(c *fiber.Ctx) error {
 	// /file/:winver
 	if isCanDownload() {
 		winver := c.Params("winver")
-		// Api_handler.GetFileUrl(winver)
 
 		// fmt.Sprintf("http://" + common.Server_ip + "/static/files/" + v.Winver + ".msu")
 
-		return
+		return c.JSON(fiber.Map{
+			"status": 1,
+			"URL":    Api_handler.GetFileUrl(winver),
+		})
 	}
 
-	return nil
+	return c.JSON(fiber.Map{
+		"status": 0,
+		"URL":    "",
+	})
 }
 
 func ChangeConnPool(c *fiber.Ctx) error {
